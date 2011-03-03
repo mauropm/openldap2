@@ -1,0 +1,461 @@
+--- openldap-2.3.32/servers/slapd/back-ldap/back-ldap.h
++++ openldap-2.3.32-bind_cache/servers/slapd/back-ldap/back-ldap.h
+@@ -198,6 +198,14 @@
+ 	time_t		li_conn_ttl;
+ 	time_t		li_idle_timeout;
+ 	time_t		li_timeout[ LDAP_BACK_OP_LAST ];
++
++	int		li_bind_cache_enabled;
++	int		li_peerchk_period;
++	int		li_alive;
++	char		**li_bind;
++	char		*li_peerchk_base;
++	char		*li_peerchk_filter;
++	char		*li_peerchk_attr;
+ } ldapinfo_t;
+ 
+ typedef enum ldap_back_send_t {
+--- openldap-2.3.32/servers/slapd/back-ldap/bind.c
++++ openldap-2.3.32-bind_cache/servers/slapd/back-ldap/bind.c
+@@ -54,6 +54,99 @@
+ static int
+ ldap_back_conndnlc_cmp( const void *c1, const void *c2 );
+ 
++#define MAX_PWLEN 256
++
++char*
++internal_back_token( Operation *op )
++{
++	char *token;
++	ber_len_t size;
++
++	size = op->o_req_dn.bv_len + op->oq_bind.rb_cred.bv_len;
++	token = ch_calloc( 1 + size, sizeof(char) );
++
++	memcpy( token, op->o_req_dn.bv_val, op->o_req_dn.bv_len );
++	memcpy( token + op->o_req_dn.bv_len,
++		op->oq_bind.rb_cred.bv_val, op->oq_bind.rb_cred.bv_len );
++
++	return token;
++}
++
++int
++ldap_internal_bind( Operation *op, SlapReply *rs )
++{
++	ldapinfo_t	*li = (ldapinfo_t *) op->o_bd->be_private;
++	char		*token;
++
++	rs->sr_text = NULL;
++
++	if (op->oq_bind.rb_cred.bv_len > MAX_PWLEN) {
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: dn=\"%s\" warning: "
++			"invalid rb_cred length %s(%ld)\n",
++			op->o_req_dn.bv_val, op->oq_bind.rb_cred.bv_len,
++			__FUNCTION__ );
++		rs->sr_err = LDAP_NO_SUCH_ATTRIBUTE;
++		goto finish;
++	}
++
++	if ( li->li_bind == NULL ) {
++		rs->sr_err = LDAP_NO_SUCH_OBJECT;
++		goto finish;
++	}
++
++	token = internal_back_token( op );
++	if ( ldap_charray_inlist( li->li_bind, token ) ) {
++		rs->sr_err = LDAP_SUCCESS;
++	} else {
++		rs->sr_err = LDAP_INVALID_CREDENTIALS;
++	}
++	ch_free( token );
++
++finish:;
++	send_ldap_result( op, rs );
++
++	Debug( LDAP_DEBUG_ANY, "==> keepalive: dn=\"%s\" offline bind %d\n",
++		op->o_req_dn.bv_val, rs->sr_err, 0 );
++
++	return rs->sr_err;
++}
++
++int
++ldap_internal_cred_update( Operation *op, SlapReply *rs )
++{
++	ldapinfo_t	*li = (ldapinfo_t *) op->o_bd->be_private;
++	char		*token;
++	int		i, rc = 0, found = 0;
++
++	if (op->oq_bind.rb_cred.bv_len > MAX_PWLEN) {
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: dn=\"%s\" warning: invalid rb_cred length %s(%ld)\n", op->o_req_dn.bv_val, op->oq_bind.rb_cred.bv_len, __FUNCTION__ );
++		return 0;
++	}
++
++	token = internal_back_token( op );
++	for ( i=0; li->li_bind && li->li_bind[i] != NULL; i++ ) {
++		if ( strncasecmp( op->o_req_dn.bv_val, li->li_bind[i],
++				  op->o_req_dn.bv_len ) == 0 ) {
++			found = 1;
++			break;
++		}
++	}
++
++	if ( found ) {
++		li->li_bind[i] = ch_strdup( token );
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: dn=\"%s\" updated\n",
++			op->o_req_dn.bv_val, 0, 0 );
++	} else {
++		rc = ldap_charray_add( &li->li_bind, token );
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: dn=\"%s\" added\n",
++			op->o_req_dn.bv_val, 0, 0 );
++	}
++
++	ch_free( token );
++
++	return rc;
++}
++
+ int
+ ldap_back_bind( Operation *op, SlapReply *rs )
+ {
+@@ -63,6 +156,13 @@
+ 	int rc = 0;
+ 	ber_int_t msgid;
+ 
++	/*
++	 * Trying to authenticate by using internal bind cache
++	 */
++	if ( li->li_bind_cache_enabled && !li->li_alive ) {
++		return ldap_internal_bind( op, rs );
++	}
++
+ 	lc = ldap_back_getconn( op, rs, LDAP_BACK_BIND_SERR );
+ 	if ( !lc ) {
+ 		return rs->sr_err;
+@@ -80,6 +180,29 @@
+ 			&op->orb_cred, op->o_ctrls, NULL, &msgid );
+ 	rc = ldap_back_op_result( lc, op, rs, msgid, 0, LDAP_BACK_SENDERR );
+ 
++	if ( li->li_bind_cache_enabled ) {
++		if ( rc == LDAP_SUCCESS ) {
++			Debug( LDAP_DEBUG_ANY,
++				"==> keepalive: host \"%s\" is alive\n",
++				li->li_uri, 0, 0 );
++			li->li_alive = 1; /* alive */
++			ldap_internal_cred_update( op, rs );
++		} else if ( rc == LDAP_UNAVAILABLE ||
++			    rc == LDAP_TIMEOUT ||
++			    rc == LDAP_BUSY ) {
++			Debug( LDAP_DEBUG_ANY,
++				"==> keepalive: host \"%s\" got an error %d\n",
++				li->li_uri, rc, 0 );
++			li->li_alive = 0; /* dead */
++		} else {
++			/* peer is alive */
++			Debug( LDAP_DEBUG_ANY,
++				"==> keepalive: host \"%s\" is alive (%d)\n",
++				li->li_uri, rc, 0 );
++			li->li_alive = 1;
++		}
++	}
++
+ 	if ( rc == LDAP_SUCCESS ) {
+ 		/* If defined, proxyAuthz will be used also when
+ 		 * back-ldap is the authorizing backend; for this
+@@ -1160,6 +1283,13 @@
+ 	assert( lcp != NULL );
+ 	assert( *lcp != NULL );
+ 
++	/*
++	 * Trying to authenticate by using internal bind cache
++	 */
++	if ( li->li_bind_cache_enabled && !li->li_alive ) {
++		return ldap_internal_bind( op, rs );
++	}
++
+ 	ldap_pvt_thread_mutex_lock( &li->li_conninfo.lai_mutex );
+ 
+ 	if ( (*lcp)->lc_refcnt == 1 ) {
+--- openldap-2.3.32/servers/slapd/back-ldap/config.c
++++ openldap-2.3.32-bind_cache/servers/slapd/back-ldap/config.c
+@@ -65,6 +65,7 @@
+ 	LDAP_BACK_CFG_NETWORK_TIMEOUT,
+ 	LDAP_BACK_CFG_VERSION,
+ 	LDAP_BACK_CFG_REWRITE,
++	LDAP_BACK_CFG_KEEPALIVE,
+ 
+ 	LDAP_BACK_CFG_LAST
+ };
+@@ -259,6 +260,9 @@
+ 	{ "rewrite", "<arglist>", 2, 4, STRLENOF( "rewrite" ),
+ 		ARG_STRING|ARG_MAGIC|LDAP_BACK_CFG_REWRITE,
+ 		ldap_back_cf_gen, NULL, NULL, NULL },
++	{ "keepalive", "peerchkPeriod> <searchBase> <searchFilter> <searchAttr", 4, 5, STRLENOF( "keepalive" ),
++		ARG_MAGIC|LDAP_BACK_CFG_KEEPALIVE,
++		ldap_back_cf_gen, NULL, NULL, NULL },
+ 	{ NULL, NULL, 0, 0, 0, ARG_IGNORED,
+ 		NULL, NULL, NULL, NULL }
+ };
+@@ -1286,6 +1290,26 @@
+ 			"and prefix all directives with \"rwm-\")" );
+ 		Debug( LDAP_DEBUG_ANY, "%s: %s.\n", c->log, c->msg, 0 );
+ 		return 1;
++
++	case LDAP_BACK_CFG_KEEPALIVE:
++		if ( lutil_atoi( &li->li_peerchk_period, c->argv[1] ) != 0 ) {
++			snprintf( c->msg, sizeof( c->msg ),
++				"Invalid peerchkPeriod parameter" );
++			Debug( LDAP_DEBUG_ANY, "%s: %s.\n", c->log, c->msg, 0 );
++			return 1;
++		}
++
++		if ( li->li_peerchk_period <= 0 ) {
++			li->li_bind_cache_enabled = 0;
++		} else {
++			/* enabling bind cache procedures */
++			li->li_bind_cache_enabled = 1;
++		}
++
++		li->li_peerchk_base = ch_strdup( c->argv[2] );
++		li->li_peerchk_filter = ch_strdup( c->argv[3] );
++		li->li_peerchk_attr = ch_strdup( c->argv[4] );
++		break;
+ 		
+ 	default:
+ 		/* FIXME: try to catch inconsistencies */
+--- openldap-2.3.32/servers/slapd/back-ldap/init.c
++++ openldap-2.3.32-bind_cache/servers/slapd/back-ldap/init.c
+@@ -31,6 +31,13 @@
+ #include "slap.h"
+ #include "back-ldap.h"
+ 
++#include <ldap_rq.h>
++
++#undef ldap_debug	/* silence a warning in ldap-int.h */
++#include "../../../libraries/libldap/ldap-int.h"
++
++#include "lutil.h"
++
+ int
+ ldap_back_open( BackendInfo	*bi )
+ {
+@@ -118,6 +125,9 @@
+ 	/* initialize version */
+ 	li->li_version = LDAP_VERSION3;
+ 
++	/* initialize peer alive */
++	li->li_alive = 1;	/* alive by default */
++
+ 	ldap_pvt_thread_mutex_init( &li->li_conninfo.lai_mutex );
+ 
+ 	be->be_private = li;
+@@ -128,6 +138,130 @@
+ 	return 0;
+ }
+ 
++LDAP *
++peer_try_connect( ldapinfo_t *li )
++{
++	LDAP *ld;
++
++	if ( ldap_initialize( &ld, li->li_uri ) != LDAP_SUCCESS ) {
++		return NULL;
++	}
++
++	if ( li->li_network_timeout > 0 ) {
++		struct timeval		tv;
++
++		tv.tv_sec = li->li_network_timeout;
++		tv.tv_usec = 0;
++		ldap_set_option( ld, LDAP_OPT_NETWORK_TIMEOUT,
++				(const void *)&tv );
++        }
++
++	if ( ldap_open_defconn( ld ) < 0 ) {
++		ldap_ld_free( ld, 0, NULL, NULL );
++		return NULL;
++        }
++
++	return ld;
++}
++
++int
++peer_try_search( LDAP *ld, ldapinfo_t *li )
++{
++	char *attrs[] = { li->li_peerchk_attr, NULL };
++	int msgid;
++	LDAPMessage *res, *entry;
++	BerElement ber;
++	char *attr;
++
++	msgid = ldap_search( ld, li->li_peerchk_base, LDAP_SCOPE_BASE,
++			li->li_peerchk_filter, attrs, 0 );
++	if ( msgid == -1 ) {
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: search request "
++			"to peer \"%s\" failed\n", li->li_uri, 0, 0 );
++		return -1;
++	}
++
++	if ( ldap_result( ld, msgid, 1, NULL, &res ) == -1 ) {
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: fetch result "
++			"from peer \"%s\" failed\n", li->li_uri, 0, 0 );
++		return -1;
++	}
++
++	entry = ldap_first_entry( ld, res );
++	if ( entry == NULL ) {
++		ldap_msgfree( res );
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: fetch entry "
++			"from peer \"%s\" failed\n", li->li_uri, 0, 0 );
++		return -1;
++        }
++
++	ber = *entry->lm_ber;
++
++	/* skip sequence, dn, sequence of, and snag the first attr */
++	if ( ber_scanf( &ber, "{x{{a" /*}}}*/, &attr ) == LBER_ERROR ) {
++		ldap_msgfree( res );
++		Debug( LDAP_DEBUG_ANY, "==> keepalive: fetch attribute "
++			"from peer \"%s\" failed\n", li->li_uri, 0, 0 );
++		return -1;
++	}
++
++	ldap_msgfree( res );
++	LDAP_FREE( attr );
++
++	return 0;
++}
++
++void *
++ldap_back_peerchk(
++	void *ctx,
++	void *arg
++)
++{
++	struct re_s *rtask = arg;
++	Backend *be = rtask->arg;
++	ldapinfo_t *li = (ldapinfo_t *)be->be_private;
++	LDAP *ld;
++
++	Debug( LDAP_DEBUG_ANY, "==> keepalive: trying URI %s\n",
++			li->li_uri, 0, 0 );
++
++	ld = peer_try_connect( li );
++	if ( !ld ) {
++		if ( li->li_alive ) {
++			Debug( LDAP_DEBUG_ANY,
++				"==> keepalive: host \"%s\" is down\n",
++				li->li_uri, 0, 0 );
++			li->li_alive = 0; /* dead */
++		}
++	} else {
++		if ( !li->li_alive ) {
++			Debug( LDAP_DEBUG_ANY,
++				"==> keepalive: host \"%s\" is up\n",
++				li->li_uri, 0, 0 );
++			li->li_alive = 1; /* alive */
++		}
++
++		if ( peer_try_search( ld, li ) != 0 ) {
++			Debug( LDAP_DEBUG_ANY, "==> keepalive: host \"%s\" "
++				"(base=\"%s\" filter=\"%s\") search failed or "
++				"null result\n", li->li_uri,
++				li->li_peerchk_base, li->li_peerchk_filter );
++			li->li_alive = 0;
++		}
++
++		ldap_unbind( ld );
++	}
++
++	ldap_pvt_thread_mutex_lock( &slapd_rq.rq_mutex );
++	if ( ldap_pvt_runqueue_isrunning( &slapd_rq, rtask )) {
++		ldap_pvt_runqueue_stoptask( &slapd_rq, rtask );
++	}
++	ldap_pvt_runqueue_resched( &slapd_rq, rtask, 0 );
++	ldap_pvt_thread_mutex_unlock( &slapd_rq.rq_mutex );
++
++	return NULL;
++}
++
+ int
+ ldap_back_db_open( BackendDB *be )
+ {
+@@ -192,6 +326,18 @@
+ 		}
+ 	}
+ 
++	/*
++	 * If we're in server mode and the bind cache is enabled,
++	 * submit a task to perform periodic peer checks.
++	 */
++	if ( ( slapMode & SLAP_SERVER_MODE ) && li->li_bind_cache_enabled ) {
++		ldap_pvt_thread_mutex_lock( &slapd_rq.rq_mutex );
++		ldap_pvt_runqueue_insert( &slapd_rq, li->li_peerchk_period,
++			ldap_back_peerchk, be,
++			"ldap_back_peerchk", be->be_suffix[0].bv_val );
++		ldap_pvt_thread_mutex_unlock( &slapd_rq.rq_mutex );
++	}
++
+ 	return 0;
+ }
+ 
+@@ -286,6 +432,21 @@
+ 			avl_free( li->li_conninfo.lai_tree, ldap_back_conn_free );
+ 		}
+ 
++		ldap_charray_free( li->li_bind );
++
++		if ( li->li_peerchk_base ) {
++			ch_free( li->li_peerchk_base );
++			li->li_peerchk_base = NULL;
++		}
++		if ( li->li_peerchk_filter ) {
++			ch_free( li->li_peerchk_filter );
++			li->li_peerchk_filter = NULL;
++		}
++		if ( li->li_peerchk_attr ) {
++			ch_free( li->li_peerchk_attr );
++			li->li_peerchk_attr = NULL;
++		}
++
+ 		ldap_pvt_thread_mutex_unlock( &li->li_conninfo.lai_mutex );
+ 		ldap_pvt_thread_mutex_destroy( &li->li_conninfo.lai_mutex );
+ 	}
+--- openldap-2.3.32/servers/slapd/back-ldap/search.c
++++ openldap-2.3.32-bind_cache/servers/slapd/back-ldap/search.c
+@@ -159,6 +159,22 @@
+ 	/* FIXME: shouldn't this be null? */
+ 	const char	*save_matched = rs->sr_matched;
+ 
++	ldapinfo_t	*li = (ldapinfo_t *) op->o_bd->be_private;
++
++	/*
++	 * When the remote server is down and no entries
++	 * were found in _pcache_, you can't perform _search_ requests.
++	 */
++	if ( li->li_bind_cache_enabled && !li->li_alive ) {
++		rs->sr_err = LDAP_NO_SUCH_OBJECT;
++		rs->sr_text = "ldap_search: peer is unreachable";
++
++		lc = NULL;
++		rc = rs->sr_err;
++
++		goto finish;
++	}
++
+ 	lc = ldap_back_getconn( op, rs, LDAP_BACK_SENDERR );
+ 	if ( !lc || !ldap_back_dobind( lc, op, rs, LDAP_BACK_SENDERR ) ) {
+ 		return rs->sr_err;
+@@ -219,6 +235,13 @@
+ 	if ( rs->sr_err != LDAP_SUCCESS ) {
+ 		switch ( rs->sr_err ) {
+ 		case LDAP_SERVER_DOWN:
++			if ( li->li_bind_cache_enabled && li->li_alive ) {
++				Debug( LDAP_DEBUG_ANY,
++					"==> keepalive: host \"%s\" is down\n",
++					li->li_uri, 0, 0 );
++				li->li_alive = 0; /* dead */
++			}
++
+ 			if ( do_retry ) {
+ 				do_retry = 0;
+ 				if ( ldap_back_retry( &lc, op, rs, LDAP_BACK_DONTSEND ) ) {

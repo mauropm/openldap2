@@ -1,0 +1,236 @@
+Index: servers/slapd/overlays/rwm.c
+===================================================================
+--- servers/slapd/overlays/rwm.c.orig
++++ servers/slapd/overlays/rwm.c
+@@ -32,6 +32,7 @@ typedef struct rwm_op_state {
+ 	struct berval ro_ndn;
+ 	struct berval r_dn;
+ 	struct berval r_ndn;
++	AttributeName *mapped_attrs;
+ 	OpRequest o_request;
+ } rwm_op_state;
+ 
+@@ -79,7 +80,7 @@ rwm_op_cleanup( Operation *op, SlapReply
+ 			}
+ 			break;
+ 		case LDAP_REQ_SEARCH:
+-			ch_free( op->ors_attrs );
++			ch_free( ros->mapped_attrs );
+ 			filter_free_x( op, op->ors_filter );
+ 			ch_free( op->ors_filterstr.bv_val );
+ 			op->ors_attrs = ros->ors_attrs;
+@@ -769,6 +770,11 @@ rwm_swap_attrs( Operation *op, SlapReply
+ 	rwm_op_state *ros = cb->sc_private;
+ 
+ 	rs->sr_attrs = ros->ors_attrs;
++
++	/* other overlays might have touched op->ors_attrs, 
++	 * so we restore the original version here, otherwise
++	 * attribute-mapping might fail */
++	op->ors_attrs = ros->mapped_attrs; 
+ 	
+  	return SLAP_CB_CONTINUE;
+ }
+@@ -843,6 +849,9 @@ rwm_op_search( Operation *op, SlapReply 
+ 	}
+ 
+ 	op->ors_attrs = an;
++	/* store the mapped Attributes for later usage, in
++	 * the case that other overlays change op->ors_attrs */
++	roc->ros.mapped_attrs = an;
+ 	roc->cb.sc_response = rwm_swap_attrs;
+ 
+ 	op->o_callback = &roc->cb;
+Index: servers/slapd/overlays/pcache.c
+===================================================================
+--- servers/slapd/overlays/pcache.c.orig
++++ servers/slapd/overlays/pcache.c
+@@ -1026,22 +1026,14 @@ cache_entries(
+ }
+ 
+ static int
+-pcache_response(
+-	Operation	*op,
+-	SlapReply	*rs )
+-{
+-	struct search_info *si = op->o_callback->sc_private;
++pcache_op_cleanup( Operation *op, SlapReply *rs ) {
++	slap_callback	*cb = op->o_callback;
++	struct search_info *si = cb->sc_private;
+ 	slap_overinst *on = si->on;
+ 	cache_manager *cm = on->on_bi.bi_private;
+ 	query_manager*		qm = cm->qm;
+ 	struct berval uuid;
+-
+-	if ( si->query.save_attrs != NULL ) {
+-		rs->sr_attrs = si->query.save_attrs;
+-		op->ors_attrs = si->query.save_attrs;
+-		si->query.save_attrs = NULL;
+-	}
+-
++	
+ 	if ( rs->sr_type == REP_SEARCH ) {
+ 		Entry *e;
+ 		/* If we haven't exceeded the limit for this query,
+@@ -1066,40 +1058,89 @@ pcache_response(
+ 				si->tail = NULL;
+ 			}
+ 		}
+-
+-	} else if ( rs->sr_type == REP_RESULT ) {
+-		QueryTemplate* templ = (qm->templates)+si->template_id;
+-		if (( si->count && cache_entries( op, rs, &uuid ) == 0 ) ||
+-			( templ->negttl && !si->count && !si->over &&
+-				rs->sr_err == LDAP_SUCCESS )) {
+-			qm->addfunc(qm, &si->query, si->template_id,
+-				si->count ? &uuid : NULL);
+-
+-			ldap_pvt_thread_mutex_lock(&cm->cache_mutex);
+-			cm->num_cached_queries++;
+-			Debug( pcache_debug, "STORED QUERIES = %lu\n",
+-					cm->num_cached_queries, 0, 0 );
+-			ldap_pvt_thread_mutex_unlock(&cm->cache_mutex);
+-
+-			/* If the consistency checker suspended itself,
+-			 * wake it back up
+-			 */
+-			if ( cm->cc_paused ) {
+-				ldap_pvt_thread_mutex_lock( &slapd_rq.rq_mutex );
+-				if ( cm->cc_paused ) {
+-					cm->cc_paused = 0;
+-					ldap_pvt_runqueue_resched( &slapd_rq, cm->cc_arg, 0 );
++	}
++	
++	if ( rs->sr_type == REP_RESULT ||
++		op->o_abandon || rs->sr_err == SLAPD_ABANDON ) {
++		
++		if ( si->query.save_attrs != NULL ) {
++			rs->sr_attrs = si->query.save_attrs;
++			op->ors_attrs = si->query.save_attrs;
++		}
++		if ( op->o_abandon || rs->sr_err == SLAPD_ABANDON ||
++			rs->sr_err == LDAP_SIZELIMIT_EXCEEDED || 
++			rs->sr_err == LDAP_TIMELIMIT_EXCEEDED ){ 
++			filter_free( si->query.filter );
++			if ( si->count ) {
++				Entry *e;
++				for (;si->head; si->head=e) {
++					e = si->head->e_private;
++					si->head->e_private = NULL;
++					entry_free(si->head);
+ 				}
+-				ldap_pvt_thread_mutex_unlock( &slapd_rq.rq_mutex );
+ 			}
++			op->o_callback = op->o_callback->sc_next;
++			op->o_tmpfree( cb, op->o_tmpmemctx );
+ 		} else {
+-			free( si->query.attrs );
+-			filter_free( si->query.filter );
++			QueryTemplate* templ = (qm->templates)+si->template_id;
++			if (( si->count && cache_entries( op, rs, &uuid ) == 0 ) ||
++				( templ->negttl && !si->count && !si->over &&
++					rs->sr_err == LDAP_SUCCESS )) {
++				qm->addfunc(qm, &si->query, si->template_id,
++					si->count ? &uuid : NULL);
++
++				ldap_pvt_thread_mutex_lock(&cm->cache_mutex);
++				cm->num_cached_queries++;
++				Debug( pcache_debug, "STORED QUERIES = %lu\n",
++						cm->num_cached_queries, 0, 0 );
++				ldap_pvt_thread_mutex_unlock(&cm->cache_mutex);
++
++				/* If the consistency checker suspended itself,
++				 * wake it back up
++				 */
++				if ( cm->cc_paused ) {
++					ldap_pvt_thread_mutex_lock( &slapd_rq.rq_mutex );
++					if ( cm->cc_paused ) {
++						cm->cc_paused = 0;
++						ldap_pvt_runqueue_resched( &slapd_rq, cm->cc_arg, 0 );
++					}
++					ldap_pvt_thread_mutex_unlock( &slapd_rq.rq_mutex );
++				}
++			} else {
++				if (si->count ){
++					/* duplicate query, free it */
++					Entry *e;
++					for (;si->head; si->head=e) {
++						e = si->head->e_private;
++						si->head->e_private = NULL;
++						entry_free(si->head);
++					}
++				}
++				free( si->query.attrs );
++				filter_free( si->query.filter );
++			}
+ 		}
++	}
++
++	return SLAP_CB_CONTINUE;
++}
++
++static int
++pcache_response(
++	Operation	*op,
++	SlapReply	*rs )
++{
++	struct search_info *si = op->o_callback->sc_private;
++	slap_overinst *on = si->on;
++	cache_manager *cm = on->on_bi.bi_private;
++	query_manager*		qm = cm->qm;
++	struct berval uuid;
+ 
+-		/* free self */
+-		op->o_callback->sc_cleanup = slap_freeself_cb;
++	if ( si->query.save_attrs != NULL ) {
++		rs->sr_attrs = si->query.save_attrs;
++		op->ors_attrs = si->query.save_attrs;
+ 	}
++
+ 	return SLAP_CB_CONTINUE;
+ }
+ 
+@@ -1317,7 +1358,7 @@ pcache_op_search(
+ 
+ 		cb = op->o_tmpalloc( sizeof(*cb) + sizeof(*si), op->o_tmpmemctx);
+ 		cb->sc_response = pcache_response;
+-		cb->sc_cleanup = NULL;
++		cb->sc_cleanup = pcache_op_cleanup;
+ 		cb->sc_private = (cb+1);
+ 		si = cb->sc_private;
+ 		si->on = on;
+Index: servers/slapd/result.c
+===================================================================
+--- servers/slapd/result.c.orig
++++ servers/slapd/result.c
+@@ -287,7 +287,7 @@ send_ldap_response(
+ 	int		rc = LDAP_SUCCESS;
+ 	long	bytes;
+ 
+-	if ( rs->sr_err == SLAPD_ABANDON ) {
++	if ( rs->sr_err == SLAPD_ABANDON || op->o_abandon ){
+ 		rc = SLAPD_ABANDON;
+ 		goto clean2;
+ 	}
+@@ -527,7 +527,7 @@ slap_send_ldap_result( Operation *op, Sl
+ 	rs->sr_type = REP_RESULT;
+ 
+ 	/* Propagate Abandons so that cleanup callbacks can be processed */
+-	if ( rs->sr_err == SLAPD_ABANDON )
++	if ( rs->sr_err == SLAPD_ABANDON || op->o_abandon )
+ 		goto abandon;
+ 
+ 	assert( !LDAP_API_ERROR( rs->sr_err ) );
+Index: tests/scripts/test020-proxycache
+===================================================================
+--- tests/scripts/test020-proxycache.orig
++++ tests/scripts/test020-proxycache
+@@ -221,6 +221,8 @@ else 
+ 	exit 1
+ fi
+ 
++echo "Waiting 30 seconds for slapo-pcache to settle..."
++sleep 30
+ echo "Query 8: filter:(|(cn=*Jones)(sn=Jones)) attrs:cn sn title uid"  
+ echo "# Query 8: filter:(|(cn=*Jones)(sn=Jones)) attrs:cn sn title uid" >> $SLAVEOUT
+ $LDAPSEARCH -x -S "" -b "$BASEDN" -h $LOCALHOST -p $PORT2 \

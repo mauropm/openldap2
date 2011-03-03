@@ -1,0 +1,22 @@
+Index: servers/slapd/modify.c
+===================================================================
+RCS file: /repo/OpenLDAP/pkg/ldap/servers/slapd/modify.c,v
+retrieving revision 1.227.2.25
+retrieving revision 1.227.2.26
+diff -u -r1.227.2.25 -r1.227.2.26
+--- servers/slapd/modify.c	2 Jan 2007 21:43:56 -0000	1.227.2.25
++++ servers/slapd/modify.c	4 Sep 2007 03:42:37 -0000	1.227.2.26
+@@ -1,4 +1,4 @@
+-/* $OpenLDAP: pkg/ldap/servers/slapd/modify.c,v 1.227.2.25 2007/01/02 21:43:56 kurt Exp $ */
++/* $OpenLDAP: pkg/ldap/servers/slapd/modify.c,v 1.227.2.26 2007/09/04 03:42:37 hyc Exp $ */
+ /* This work is part of OpenLDAP Software <http://www.openldap.org/>.
+  *
+  * Copyright 1998-2007 The OpenLDAP Foundation.
+@@ -734,6 +734,7 @@
+ 							"%s: value #%ld normalization failed",
+ 							ml->sml_type.bv_val, (long) nvals );
+ 						*text = textbuf;
++						BER_BVZERO( &ml->sml_nvalues[nvals] );
+ 						return rc;
+ 					}
+ 				}

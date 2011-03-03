@@ -1,0 +1,34 @@
+Index: libraries/libldap/cyrus.c
+===================================================================
+RCS file: /repo/OpenLDAP/pkg/ldap/libraries/libldap/cyrus.c,v
+retrieving revision 1.139
+retrieving revision 1.140
+diff -u -r1.139 -r1.140
+--- libraries/libldap/cyrus.c	2 Jan 2007 19:00:58 -0000	1.139
++++ libraries/libldap/cyrus.c	23 Apr 2007 12:21:48 -0000	1.140
+@@ -208,7 +208,7 @@
+ 		| buf[2] << 8
+ 		| buf[3];
+ 
+-	if ( size > SASL_MAX_BUFF_SIZE ) {
++	if ( size >= SASL_MAX_BUFF_SIZE ) {
+ 		/* somebody is trying to mess me up. */
+ 		ber_log_printf( LDAP_DEBUG_ANY, debuglevel,
+ 			"sb_sasl_pkt_length: received illegal packet length "
+Index: libraries/libldap/ldap-int.h
+===================================================================
+RCS file: /repo/OpenLDAP/pkg/ldap/libraries/libldap/ldap-int.h,v
+retrieving revision 1.185
+retrieving revision 1.186
+diff -u -r1.185 -r1.186
+--- libraries/libldap/ldap-int.h	15 Feb 2007 00:42:23 -0000	1.185
++++ libraries/libldap/ldap-int.h	23 Apr 2007 12:21:48 -0000	1.186
+@@ -38,7 +38,7 @@
+ #include <sasl.h>
+ #endif
+ 
+-#define SASL_MAX_BUFF_SIZE	65536
++#define SASL_MAX_BUFF_SIZE	(0xffffff)
+ #define SASL_MIN_BUFF_SIZE	4096
+ #endif
+ 

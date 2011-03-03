@@ -1,0 +1,40 @@
+Updating from OpenLDAP 2.2.X to 2.3.X
+=====================================
+
+Changed Database format:
+    Due change in the "BDB"-backend's database format, existing
+    bdb-databases need to be reloaded from LDIF completely. This is
+    normally done during the package installation/update. This might not
+    work in all setups and for that reason backups of the slapd.conf
+    configuration file and database dumps of all bdb databases that are
+    present in slapd.conf are created during the update. 
+    You can find the slapd.conf backup copy in
+    /etc/openldap/slapd.conf.XXXXXXXXXX, where "XXXXXXXXXX" represents a
+    random string. The database dump of each bdb database is created in the
+    database directory for that database (default: /var/lib/ldap/). The
+    file name is "ldapbak.ldif.X" where "X" presents the number of the
+    database.
+    If the database backups where not created during the package update for
+    some reason, you can do them manually by using:
+        "/usr/sbin/openldap-2.2-slapcat -T c"
+    Before dumping the database you should remove the db's enviroment (the
+    __db*-file in /var/lib/ldap)
+    To reload the databases please use the tool "slapadd". 
+
+Packaging Changes:
+    - The openldap2-back-ldap and openldap2-back-monitor subpackages are no
+      longer available. The LDAP and the Monitor backend are now part of
+      the main package and no longer compiled as dynamic modules. If you
+      use back-ldap and back-monitor please remove the corresponding
+      "moduleload" statements from your configuration files.
+
+    - Since the OpenLDAP Server daemon has now implemented an automatic
+      database recovery mechanism the OPENLDAP_RUN_DB_RECOVER keyword has
+      be removed from /etc/sysconfig/openldap and is no longer valid.
+    
+Other:
+    The syncrepl provider is now implemented as an "overlay" to slapd.  If
+    you want a database to act as a syncrepl provider you need to add
+    "overlay syncrepl" to it configuration. For details see the
+    Administration Guide (/usr/share/doc/packages/openldap2/admin-guide/)
+
