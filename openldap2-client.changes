@@ -1,0 +1,1184 @@
+-------------------------------------------------------------------
+Fri Apr  3 15:18:40 CEST 2009 - rhafer@suse.de
+
+- Removed unneeded man-pages patch 
+
+-------------------------------------------------------------------
+Tue Sep  9 17:09:41 CEST 2008 - rhafer@suse.de
+
+- Fixed Dependencies of openldap2 (require libldap = %{version} 
+  instead of openldap2-client)
+
+-------------------------------------------------------------------
+Tue Jul 29 15:50:54 CEST 2008 - rhafer@suse.de
+
+- Update to Version 2.3.43. Most important changes:
+  * Fixed liblber ber_get_next length decoding (ITS#5580)
+  * Fixed slapd replog timestamps (ITS#5532)
+  * Fixed slapd socket assert (ITS#5489)
+  * Fixed slapo-ppolicy modify with internal ops (ITS#5569)
+  * Fixed slapo-syncprov psearch on closed connection (ITS#5401, ITS#5565)
+
+-------------------------------------------------------------------
+Fri Jul  4 09:08:51 CEST 2008 - rhafer@suse.de
+
+- Disabled testsuite for 11.0 and new releases (bnc#288879) 
+
+-------------------------------------------------------------------
+Tue Jul  1 15:30:35 CEST 2008 - rhafer@suse.de
+
+- Update to Version 2.3.42. Most important changes:
+  * Fixed libldap ld_defconn cleanup if it was freed (ITS#5518, ITS#5525)
+  * Fixed slapd abstract objectClass inheritance check (ITS#5474)
+  * Fixed slapd connection handling (ITS#5469)
+  * Fixed slapd delta-syncrepl refresh mode (ITS#5376)
+  * Fixed slapd delta-syncrepl resync (ITS#5378)
+  * Fixed slapd pagedresults stale state (ITS#5409)
+  * Fixed slapd-monitor MAXPATHLEN (ITS#5531)
+  * Fixed slapd-ldap connection handler (ITS#5404)
+  * Fixed slapd-ldap entry_get() op-dependent behavior (ITS#5513)
+  * Fixed slapd-meta quarantine crasher (ITS#5522)
+  * Fixed slapo-accesslog null callback stack crash (ITS#5490)
+  * Fixed slapo-syncprov csn update with delta-syncrepl (ITS#5493)
+
+-------------------------------------------------------------------
+Wed Feb 20 11:05:12 CET 2008 - rhafer@suse.de
+
+- Update to Version 2.3.41. Most important changes:
+  * Fixed slapd timestamp race condition (ITS#5370)
+  * Fixed slapd delta-syncrepl refresh mode (ITS#5376)
+  * Fixed slapd-bdb modrdn to same dn (ITS#5319)
+  * Fixed slapd-bdb crash with modrdn (ITS#5358) 
+  * Fixed slapd-bdb idlcache on adds (ITS#5086)
+  * Fixed slapo-accesslog cleanup on successful response (ITS#5374)
+  * Fixed syncrepl propagation of errors (ITS#5282)
+
+-------------------------------------------------------------------
+Thu Jan 17 09:22:42 CET 2008 - rhafer@suse.de
+
+- Update to Version 2.3.40. Most important changes:
+  * Fixed slapd include handling (ITS#5276)
+  * Fixed slapd syncrepl compatibility with 2.4 (ITS#5231)
+  * Fixed slapd-bdb/hdb slapadd hang (ITS#5225)
+  * Fixed slapd-bdb/hdb dn2entry lock bug (ITS#5257)
+  * Fixed slapd-bdb/hdb dn2id lock bug (ITS#5262)
+  * Fixed slapo-accesslog abandoned op cleanup (ITS#5161)
+  * Fixed slapo-translucent interactions with slapo-rwm (ITS#4889)
+- Removed SUSE Linux 10.0 specific patches
+
+-------------------------------------------------------------------
+Mon Oct 29 12:13:52 CET 2007 - rhafer@suse.de
+
+- Update to Version 2.3.39. Most important changes:
+  * Fixed slapd database/overlay config conflict (ITS#4848)
+  * Fixed slapd password_hash config order (ITS#5082)
+  * Fixed slapd slap_mods_check bug (ITS#5119)
+  * Fixed slapd ACL sets memory handling (ITS#4860,ITS#4873)
+  * Fixed slapd ordered values add normalization issue (ITS#5136)
+  * Fixed slapd-bdb DB_CONFIG conversion bug (ITS#5118)
+  * Fixed slapd-ldap search control parsing (ITS#5138)
+  * Fixed slapd-ldap SASL idassert w/o authcId
+  * Fixed slapd-ldif directory separators in DN (ITS#5172)
+  * Fixed slapd-meta conn caching on bind failure (ITS#5154)
+  * Fixed slapd-meta bind timeout assertion (ITS#5185)
+  * Fixed slapd-sql concurrency issue (ITS#5095)
+  * Fixed slapo-chain double-free (ITS#5137)
+  * Fixed slapo-pcache and -rwm interaction fix (ITS#4991)
+  * Fixed slapo-pcache non-null terminated array crasher (ITS#5163)
+  * Fixed slapo-rwm modlist handling (ITS#5124)
+  * Fixed slapo-rwm UUID in filter (ITS#5168)
+  * Fixed sasl SASL_SSF_EXTERNAL type (ITS#3864)
+  * Fixed liblber Windows x64 portability (ITS#5105)
+  * Fixed libldap ppolicy control creation (ITS#5103)
+
+
+-------------------------------------------------------------------
+Wed Aug 22 12:06:22 CEST 2007 - rhafer@suse.de
+
+- Update to Version 2.3.38. Most important changes:
+  * Fixed slapadd check for ';binary' when required (ITS#5071)
+  * Fixed slapd select_backend/ManageDSAit (ITS#4986)
+  * Fixed slapd integer/pointer types and overflow (ITS#5035)
+  * Fixed slapd AVA_Sort on multivalued RDNs (ITS#5057)
+  * Fixed slapd LDIF parsing error handling (ITS#5090)
+  * Fixed slapd syncrepl searchbase scope (ITS#5073)
+  * Fixed slapd-bdb missing index warning (ITS#5037)
+  * Fixed slapd-bdb Quick index for ID 0 (ITS#5052)
+  * Fixed slapd-bdb spurious empty DN warnings during add (ITS#5079)
+  * Fixed slapd-hdb slapacl behavior (ITS#5087)
+  * Fixed slapd-relay configuration (ITS#4322,ITS#4340)
+  * Fixed slapd-sql structuralObjectClass issue (ITS#5088)
+  * Fixed slapo-ppolicy double-free on shutdown (ITS#5094)
+  * Fixed slapo-rwm/slapd-meta dup attrs after mapping (ITS#5091)
+  * Fixed slapo-syncprov uninit'd vars (ITS#5048,#5049)
+  * Fixed libldap ldap_add_result_entry (ITS#5056)
+- Call "ldconfig" from %post and %postun in openldap2-client
+  (Bug #298297)
+
+-------------------------------------------------------------------
+Mon Jul 23 11:40:18 CEST 2007 - rhafer@suse.de
+
+- Update to Version 2.3.37. Most important changes:
+  * Fixed slapd-glue/syncprov interaction (ITS#4623)
+  * Fixed slapd-ldap search reference crash (ITS#5025)
+  * Fixed slapd-ldbm crash on Compare op (ITS#5044)
+  * Fixed slapo-rwm searchFilter double free (ITS#5043)
+
+-------------------------------------------------------------------
+Wed Jul  4 14:05:50 CEST 2007 - rhafer@suse.de
+
+- Update to Version 2.3.36. Most important changes:
+  * Fixed slapd mutex bug after failed startup (ITS#4957)
+  * Fixed slapd sasl failed Bind bug (ITS#4954)
+  * Fixed slapd sasl ssf logging (ITS#5001)
+  * Fixed slapd tool op init (ITS#4911)
+  * Fixed slapd-bdb no-op crasher (ITS#4925)
+  * Fixed slapd-relay crash when no database can be selected (ITS#4958)
+  * Fixed slapo-chain RFC3062 passwd exop handling (ITS#4964)
+  * Fixed slapo-dynlist multiple group/url[/member] config (ITS#4989)
+  * Fixed slapo-pcache handling of abandoned Operations (#5015)
+  * Fixed slapo-pcache and -rwm interaction (ITS#4991)
+  * Fixed slapo-ppolicy pwdReset/pwdMinAge (ITS#4970)
+  * Fixed slapo-ppolicy control cleanup from ITS#4665
+  * Fixed slapo-syncprov cookie parsing error (ITS#4977)
+  * Fixed slapo-valsort crash on delete op (ITS#4966)
+  * Fixed libldap referral chasing loop (ITS#4955)
+  * Fixed libldap response code handling on rebind (ITS#4924)
+  * Fixed libldap SASL_MAX_BUFF_SIZE (ITS#4935)
+
+-------------------------------------------------------------------
+Thu May 31 17:10:10 CEST 2007 - rhafer@suse.de
+
+- import rwm and pcache fixes from HEAD 
+
+-------------------------------------------------------------------
+Mon May 21 12:19:45 CEST 2007 - dmueller@suse.de
+
+- reduce duplicated buildrequires against db42 and db45
+
+-------------------------------------------------------------------
+Tue May 15 15:50:11 CEST 2007 - rhafer@suse.de
+
+- imported apparmor profile from apparmor (this profile is not
+  enabled by default)
+
+-------------------------------------------------------------------
+Fri May  4 14:00:39 CEST 2007 - rhafer@suse.de
+
+- Update to Version 2.3.35. Most important changes:
+  * Fixed ldapmodify to use correct memory free functions (ITS#4901)
+  * Fixed slapd acl set minor typo (ITS#4874)
+  * Fixed slapd entry consistency check in str2entry2 (ITS#4852)
+  * Fixed slapd ldapi:// credential issue (ITS#4893)
+  * Fixed slapd str2anlist handling of undefined attrs/OCs (ITS#4854)
+  * Fixed slapd syncrepl delta-sync modlist free (ITS#4904)
+  * Added slapd syncrepl retry logging (ITS#4915)
+  * Fixed slapd zero-length IA5string handling (ITS#4823)
+  * Fixed slapd-bdb/hdb startup with missing shm env (ITS#4851)
+  * Fixed slapd-ldap/meta consistency in referral proxying (ITS#4861)
+  * Fixed slapd-ldap bind cleanup in case of unauthorized idassert
+  * Fixed slapd-meta search cleanup
+  * Fixed slapd-meta/slapo-rwm filter mapping
+  * Fixed slapd-sql subtree shortcut (ITS#4856)
+  * Fixed slapo-dynlist crasher (ITS#4891)
+  * Fixed slapo-refint config message (ITS#4853)
+  * Fixed libldap time_t signedness (ITS#4872)
+  * Fixed libldap_r tpool reset (ITS#4855,#4899)
+
+-------------------------------------------------------------------
+Wed May  2 14:05:05 CEST 2007 - dmueller@suse.de
+
+- Fix comparison with string literal
+
+-------------------------------------------------------------------
+Wed Apr 18 15:16:43 CEST 2007 - schwab@suse.de
+
+- Fix generation of debuginfo packages.
+
+-------------------------------------------------------------------
+Tue Mar 20 17:08:37 CET 2007 - rguenther@suse.de
+
+- removed krb5-devel BuildRequires (support via cyrus-sasl)
+
+-------------------------------------------------------------------
+Thu Mar 15 14:29:22 CET 2007 - rhafer@suse.de
+
+- added Service definitions for SuSEfirewall2 (Bug #251654) 
+
+-------------------------------------------------------------------
+Thu Feb 22 16:50:18 CET 2007 - rhafer@suse.de
+
+- Updated to Version 2.3.34. Most important changes:
+  * Fixed libldap missing get_option(TLS CipherSuite) (ITS#4815)
+  * Fixed ldapmodify printing error from ldap_result() (ITS#4812)
+  * Fixed slapadd LDIF parsing (ITS#4817)
+  * Fixed slapd libltdl link ordering (ITS#4830)
+  * Fixed slapd syncrepl memory leaks (ITS#4805)
+  * Fixed slapd dynacl/ACI compatibility with 2.1
+  * Fixed slapd-bdb/hdb be_entry_get with aliases/referrals 
+    (ITS#4810)
+  * Fixed slapd-ldap more response handling bugs (ITS#4782)
+  * Fixed slapd-ldap C-API code tests (ITS#4808)
+  * Fixed slapd-monitor NULL printf (ITS#4811)
+  * Fixed slapo-chain spurious additional info in response 
+    (ITS#4828)
+  * Fixed slapo-syncprov presence list (ITS#4813)
+  * Fixed slapo-syncprov contextCSN checkpoint again (ITS#4720)
+  * Added slapo-ppolicy cn=config support (ITS#4836)
+  * Added slapo-auditlog cn=config support
+
+-------------------------------------------------------------------
+Fri Jan 26 14:26:51 CET 2007 - rhafer@suse.de
+
+- Updated to Version 2.3.33. Most important changes:
+  * Fixed slapd-ldap chase-referrals switch (ITS#4557)
+  * Fixed slapd-ldap bind behavior when idassert is always used 
+    (ITS#4781)
+  * Fixed slapd-ldap response handling bugs (ITS#4782)
+  * Fixed slapd-ldap idassert mode=self anonymous ops (ITS#4798)
+  * Fixed slapd-ldap/meta privileged connections handling 
+    (ITS#4791)
+  * Fixed slapd-meta retrying (ITS#4594, 4762)
+  * Fixed slapo-chain referral DN use (ITS#4776)
+  * Fixed slapo-dynlist dangling pointer after entry free 
+    (ITS#4801)
+  * Fixed libldap ldap_pvt_put_filter syntax checks (ITS#4648)
+
+-------------------------------------------------------------------
+Fri Jan 12 11:04:22 CET 2007 - rhafer@suse.de
+
+- Updated to Version 2.3.32. Most important changes:
+  * Fixed libldap unchased referral leak (ITS#4545)
+  * Fixed libldap tls callback (ITS#4723)
+  * Fixed slapd memleak on failed bind (ITS#4771)
+  * Fixed slapd connections_shutdown assert
+  * Fixed slapd add redundant duplicate value check (ITS#4600)
+  * Fixed slapd ACL set memleak (ITS#4780)
+  * Fixed slapd syncrepl shutdown hang (ITS#4790) 
+
+-------------------------------------------------------------------
+Fri Nov 17 10:25:44 CET 2006 - rhafer@suse.de
+
+- Fix for a flaw in libldap's strval2strlen() function when processing the
+  authcid string of certain Bind Requests, which could allow attackers to
+  cause an affected application to crash (especially the OpenLDAP Server),
+  creating a denial of service condition (Bug#221154,ITS#4740) 
+
+-------------------------------------------------------------------
+Tue Nov 14 16:18:34 CET 2006 - rhafer@suse.de
+
+- Additional back-perl fixes from CVS. The first revision of the 
+  patch did not fix the problem completely  (Bug#207618, ITS#4751)
+
+-------------------------------------------------------------------
+Fri Oct 27 16:46:43 CEST 2006 - rhafer@suse.de
+
+- cyrus-sasl configuration moved from %{_libdir}/sasl2 to 
+  /etc/sasl2/ (Bug: #206414)
+
+-------------------------------------------------------------------
+Wed Oct  4 15:56:11 CEST 2006 - rhafer@suse.de
+
+- Add $network to Should-Start/Should-Stop in init scripts 
+  (Bug: #206823)
+- Imported latest back-perl changes from CVS, to fix back-perl 
+  initialization (Bug: #207618)
+
+-------------------------------------------------------------------
+Tue Aug 22 16:27:25 CEST 2006 - rhafer@suse.de
+
+- Updated to Version 2.3.27
+  * Fixed libldap dnssrv bug with "not present" positive statement 
+    (ITS#4610)
+  * Fixed libldap dangling pointer issue (ITS#4405)
+  * Fixed slapd incorrect rebuilding of replica URI (ITS#4633)
+  * Fixed slapd DN X.509 normalization crash (ITS#4644)
+  * Fixed slapd-monitor operations order via callbacks (ITS#4631)
+  * Fixed slapo-accesslog purge task during shutdown
+  * Fixed slapo-ppolicy handling of default policy (ITS#4634)
+  * Fixed slapo-ppolicy logging verbosity when using default policy
+  * Fixed slapo-syncprov incomplete sync on restart issues (ITS#4622)
+
+-------------------------------------------------------------------
+Wed Aug  2 11:08:23 CEST 2006 - rhafer@suse.de
+
+- Updated to Version 2.3.25
+  * Add libldap_r TLS concurrency workaround (ITS#4583)
+  * Fixed slapd acl selfwrite bug (ITS#4587)
+  * Fixed various syncrepl and slapo-syncprov bugs (ITS#4582, 4622,
+    4534,4613, 4589)
+  * Fixed slapd-bdb/hdb lock bug with virtual root (ITS#4572)
+  * Fixed slapd-bdb/hdb modrdn new entry disappearing bug (ITS#4616)
+  * Fixed slapd-bdb/hdb cache job issue
+  * Fixed slapo-ppolicy password hashing bug (ITS#4575)
+  * Fixed slapo-ppolicy password modify pwdMustChange reset bug (ITS#4576)
+  * Fixed slapo-ppolicy control can be critical (ITS#4596)
+- Enabled CLDAP (LDAP over UDP) support
+
+------------------------------------------------------------------
+Mon Jun 26 16:36:16 CEST 2006 - rhafer@suse.de
+
+- Updated to Version 2.3.24
+  * Fixed slapd syncrepl timestamp bug (delta-sync/cascade) 
+    (ITS#4567)
+  * Fixed slapd-bdb/hdb non-root users adding suffix/root entries
+    (ITS#4552)
+  * Re-fixed slapd-ldap improper free bug in exop (ITS#4550)
+  * Fixed slapd-ldif assert bug (ITS#4568)
+  * Fixed slapo-syncprov crash under glued database (ITS#4562)
+- cleaned up SLES10 update specific stuff
+- added "chain-return-error" feature from HEAD to chain overlay
+  (ITS#4570)
+
+-------------------------------------------------------------------
+Thu Jun 22 14:46:58 CEST 2006 - schwab@suse.de
+
+- Don't use automake macros without using automake.
+
+-------------------------------------------------------------------
+Wed May 24 09:52:03 CEST 2006 - rhafer@suse.de
+
+- Updated to Version 2.3.23
+  * obsoletes the patches: libldap_ads-sasl-gssapi.dif, 
+    slapd-epollerr.dif
+  * Fixed slapd-ldap improper free bug (ITS#4550)
+  * Fixed libldap referral input destroy issue (ITS#4533)
+  * Fixed libldap ldap_sort_entries tail bug (ITS#4536)
+  * Fixed slapd runqueue use of freed memory (ITS#4517)
+  * Fixed slapd thread pool init issue (ITS#4513)
+  * Fixed slapd-bdb/hdb pre/post-read freeing (ITS#4532)
+  * Fixed slapd-bdb/hdb pre/post-read unavailable issue (ITS#4538)
+  * Fixed slapd-bdb/hdb referral issue (ITS#4548)
+  * Fixed slapo-ppolicy BER tags issue (ITS#4528)
+  * Fixed slapo-ppolicy rebind bug (ITS#4516)
+  * For more details see the CHANGES file
+- Install CHANGES file to /usr/share/doc/packages/openldap2
+
+-------------------------------------------------------------------
+Wed May 10 10:20:16 CEST 2006 - rhafer@suse.de
+
+- Really apply the patch for Bug#160566 
+- slapd could crash while processing queries with pre-/postread 
+  controls (Bug#173877, ITS#4532)
+
+-------------------------------------------------------------------
+Fri Mar 24 13:48:52 CET 2006 - rhafer@suse.de
+
+- Backported fix from CVS for occasional crashes in referral 
+  chasing code (as used in e.g. back-meta/back-ldap).  
+  (Bug: #160566, ITS: #4448)
+
+-------------------------------------------------------------------
+Mon Mar 13 16:23:32 CET 2006 - rhafer@suse.de
+
+- openldap2 must obsolete -back-monitor and -back-ldap to have them
+  removed during update (Bug: #157576)
+
+-------------------------------------------------------------------
+Fri Feb 17 12:58:13 CET 2006 - rhafer@suse.de
+
+- Add "external" to the list of supported SASL mechanisms 
+  (Bug: #151771)
+
+-------------------------------------------------------------------
+Thu Feb 16 11:45:20 CET 2006 - rhafer@suse.de
+
+- Error out when conversion from old configfile to config database
+  fails (Bug: #135484,#135490 ITS: #4407)
+
+-------------------------------------------------------------------
+Mon Feb 13 14:45:43 CET 2006 - rhafer@suse.de
+
+- Don't ignore non-read/write epoll events (Bug: #149993, 
+  ITS: #4395)
+- Added update message to /usr/share/update-messages/en/ and enable
+  it, when update did not succeed.
+
+-------------------------------------------------------------------
+Thu Feb  9 11:43:56 CET 2006 - rhafer@suse.de
+
+- OPENLDAP_CHOWN_DIRS honors databases defined in include files
+  (Bug: #135473)
+- Fixed version numbers in README.update
+- Fixed GSSAPI binds against Active Directory (Bug: #149390)
+
+-------------------------------------------------------------------
+Fri Feb  3 11:32:27 CET 2006 - rhafer@suse.de
+
+- Cleaned up update procedure
+- man-pages updates and fixes (Fate: #6365)
+
+-------------------------------------------------------------------
+Fri Jan 27 09:15:33 CET 2006 - rhafer@suse.de
+
+- Updated to 2.3.19 (Bug #144371) 
+
+-------------------------------------------------------------------
+Fri Jan 27 02:16:56 CET 2006 - mls@suse.de
+
+- converted neededforbuild to BuildRequires
+
+-------------------------------------------------------------------
+Wed Jan 25 18:17:51 CET 2006 - rhafer@suse.de
+
+- Updated Admin Guide to latest version 
+- build slapcat from openldap-2.2.24 and install it to 
+  /usr/sbin/openldap-2.2-slapcat to be able to migrate from
+  OpenLDAP 2.2.
+- removed slapd-backbdb-dbupgrade which is no longer needed
+- attempt to dump/reload bdb databases in %{post}
+- Update notes in README.update
+
+-------------------------------------------------------------------
+Fri Jan 13 10:36:44 CET 2006 - rhafer@suse.de
+
+- New sysconfig variable OPENLDAP_KRB5_KEYTAB
+- Cleanup in default configuration and init scripts
+
+-------------------------------------------------------------------
+Wed Jan 11 10:13:52 CET 2006 - rhafer@suse.de
+
+- Updated to 2.3.17
+- Remove OPENLDAP_RUN_DB_RECOVER from sysconfig file in %post
+  slapd does now automatically recover the database if needed
+- Removed unneeded README.SuSE
+- Small adjustments to the default DB_CONFIG file
+
+-------------------------------------------------------------------
+Mon Jan  9 11:48:10 CET 2006 - rhafer@suse.de
+
+- Updated to 2.3.16 
+
+-------------------------------------------------------------------
+Mon Dec 19 13:55:35 CET 2005 - rhafer@suse.de
+
+- Fixed filelist (slapd-hdb man-page was missing) 
+
+-------------------------------------------------------------------
+Fri Dec  9 10:04:28 CET 2005 - rhafer@suse.de
+
+- Fixed build on x86_64 
+
+-------------------------------------------------------------------
+Wed Dec  7 10:48:57 CET 2005 - rhafer@suse.de
+
+- Merged -back-ldap and -back-monitor subpackages into the main 
+  package and don't build them as dynamic modules anymore.
+- updated to OpenLDAP 2.3.13 
+
+-------------------------------------------------------------------
+Mon Nov 28 16:56:21 CET 2005 - rhafer@suse.de
+
+- updated to OpenLDAP 2.3.12
+
+-------------------------------------------------------------------
+Wed Oct 26 11:34:24 CEST 2005 - rhafer@suse.de
+
+- updated to OpenLDAP 2.3.11
+- removed the "LDAP_DEPRECATED" workaround
+
+-------------------------------------------------------------------
+Mon Sep 26 09:51:11 CEST 2005 - rhafer@suse.de
+
+- Add "LDAP_DEPRECATED" to ldap.h for now
+
+-------------------------------------------------------------------
+Fri Sep 23 14:41:14 CEST 2005 - rhafer@suse.de
+
+- updated to OpenLDAP 2.3.7 
+
+-------------------------------------------------------------------
+Tue Aug 16 14:08:49 CEST 2005 - rhafer@suse.de
+
+- allow start_tls while chasing referrals (Bug #94355, ITS #3791)
+
+-------------------------------------------------------------------
+Mon Jul  4 11:42:08 CEST 2005 - rhafer@suse.de
+
+- devel-subpackage requires openldap2-client of the same version 
+  (Bugzilla: #93579)
+
+-------------------------------------------------------------------
+Thu Jun 30 17:55:22 CEST 2005 - uli@suse.de
+
+- build with -fPIE (not -fpie) to avoid GOT overflow on s390* 
+
+-------------------------------------------------------------------
+Wed Jun 22 16:26:42 CEST 2005 - rhafer@suse.de
+
+- build the server packages with -fpie/-pie
+
+-------------------------------------------------------------------
+Wed Jun 15 16:43:25 CEST 2005 - rhafer@suse.de
+
+- updated to 2.2.27 
+
+-------------------------------------------------------------------
+Wed May 25 13:58:57 CEST 2005 - rhafer@suse.de
+
+- libldap-gethostbyname_r.dif: Use gethostbyname_r instead of 
+  gethostbyname in libldap. Should fix host lookups through
+  nss_ldap (Bugzilla: #76173)
+
+-------------------------------------------------------------------
+Fri May 13 12:27:05 CEST 2005 - rhafer@suse.de
+
+- Updated to 2.2.26
+- made /%{_libdir}]/sasl2/slapd.conf %config(noreplace)
+
+-------------------------------------------------------------------
+Thu Apr 28 09:42:30 CEST 2005 - rhafer@suse.de
+
+- Added /%{_libdir}]/sasl2/slapd.conf to avoid warnings about 
+  unconfigured OTP mechanism (Bugzilla: #80588)
+
+-------------------------------------------------------------------
+Tue Apr 12 15:02:24 CEST 2005 - rhafer@suse.de
+
+- added minimal timeout to startproc in init-script to let it 
+  report the "failed" status correctly in case of misconfiguration 
+  (Bugzilla: #76393)
+
+-------------------------------------------------------------------
+Mon Apr  4 16:41:32 CEST 2005 - rhafer@suse.de
+
+- crl-check.dif: Implements CRL checking on client and server side
+- use different base ports for differnt values of BUILD_INCARNATION 
+  (/.buildenv) to allow parallel runs of the test-suite on a single
+  machine
+
+-------------------------------------------------------------------
+Mon Apr  4 15:33:19 CEST 2005 - uli@suse.de
+
+- force yielding-select test to yes (test occasionally hangs QEMU)
+
+-------------------------------------------------------------------
+Fri Apr  1 13:16:49 CEST 2005 - uli@suse.de
+
+- disable test suite on ARM (hangs QEMU)
+
+-------------------------------------------------------------------
+Tue Mar 29 14:21:50 CEST 2005 - rhafer@suse.de
+
+- updated to 2.2.24
+- enabled back-hdb
+
+-------------------------------------------------------------------
+Wed Mar  2 13:44:23 CET 2005 - rhafer@suse.de
+
+- syncrepl.dif: merged latest syncrepl fixes (Bugzilla: #65928)
+- libldap-reinit-fdset.dif: Re-init fd_sets when select is 
+  interupted (Bugzilla #50076, ITS: #3524)
+
+-------------------------------------------------------------------
+Thu Feb 17 14:28:02 CET 2005 - rhafer@suse.de
+
+- checkproc_before_recover.dif: Check if slapd is stopped before
+  running db_recover from the init script. (Bugzilla: #50962)
+
+-------------------------------------------------------------------
+Tue Feb  1 14:30:13 CET 2005 - rhafer@suse.de
+
+- Cleanup back-bdb databases in %post, db-4.3 changed the 
+  transaction log format again.
+- cosmetic fixes in init script
+
+-------------------------------------------------------------------
+Tue Jan 25 15:57:55 CET 2005 - rhafer@suse.de
+
+- updated to 2.2.23
+- cleaned up #neededforbuild
+- package should also build on older SuSE Linux releases now
+- increased killproc timeout in init-script (Bugzilla: #47227)
+
+-------------------------------------------------------------------
+Thu Jan 13 15:09:28 CET 2005 - rhafer@suse.de
+
+- updated to 2.2.20
+- Removed unneeded dependencies
+
+-------------------------------------------------------------------
+Fri Dec 10 12:58:58 CET 2004 - kukuk@suse.de
+
+- don't install *.la files
+
+-------------------------------------------------------------------
+Wed Nov 10 16:38:10 CET 2004 - rhafer@suse.de
+
+- updated to 2.2.18
+- use kerberos-devel-packages in neededforbuild
+
+-------------------------------------------------------------------
+Fri Sep 24 17:55:10 CEST 2004 - ro@suse.de
+
+- re-arranged specfile to sequence (header (package/descr)* rest)
+  so the checking parser is not confused ...
+
+-------------------------------------------------------------------
+Fri Sep 24 13:59:40 CEST 2004 - rhafer@suse.de
+
+- Added pre_checkin.sh to generate a separate openldap2-client 
+  spec-file from which the openldap2-client and openldap2-devel
+  subpackages are built. Should reduce build time for libldap as
+  the test-suite is only executed in openldap2.spec.
+
+-------------------------------------------------------------------
+Fri Sep 10 13:24:44 CEST 2004 - rhafer@suse.de
+
+- libldap-result.dif: ldapsearch was hanging in select() when
+  retrieving results from eDirectory through a StartTLS protected
+  connection (Bugzilla #44942)
+
+-------------------------------------------------------------------
+Mon Aug  9 23:43:18 CEST 2004 - dobey@suse.de
+
+- added ntlm support
+
+-------------------------------------------------------------------
+Tue Aug  3 14:48:25 CEST 2004 - rhafer@suse.de
+
+- updated to 2.2.16
+- Updated ACLs in slapd_conf.dif to disable default read access 
+  to the "userPKCS12" Attribute
+- rc-check-conn.diff: When starting slapd wait until is accepts 
+  connections, or 10 seconds at maximum (Bugzilla #41354)
+- Backported -o slp={on|off} feature from OpenLDAP Head and added
+  new sysconfig variable (OPENLDAP_REGISTER_SLP) to be able
+  to switch SLP registration on and off. (Bugzilla #39865)
+- removed unneeded README.update
+  
+-------------------------------------------------------------------
+Fri Apr 30 16:46:50 CEST 2004 - rhafer@suse.de
+
+- updated to 2.2.11
+- remove SLES8 update specific stuff
+- Bugzilla #39652: Updated slapd_conf.dif to contain basic access
+  control
+- Bugzilla #39468: Added missing items to yast.schema
+- fixed strict-aliasing compiler warnings (strict-aliasing.dif)
+
+-------------------------------------------------------------------
+Thu Apr 29 15:13:31 CEST 2004 - coolo@suse.de
+
+- build with several jobs if available
+
+-------------------------------------------------------------------
+Mon Apr 19 12:13:41 CEST 2004 - rhafer@suse.de
+
+- ldapi_url.dif: Fixed paths for LDAPI-socket, pid-file and 
+  args-file (Bugzilla #38790)
+- ldbm_modrdn.dif: Fixed back-ldbm modrdn indexing bug (ITS #3059,
+  Bugzilla #38915)
+- modify_check_duplicates.dif: check for duplicate attribute 
+  values in modify requests (ITS #3066/#3097, Bugzilla #38607)
+- updated and renamed yast2userconfig.schema to yast.schema as it 
+  contains more that only user configuration now
+- syncrepl.dif: addtional fixes for syncrepl (ITS #3055, #3056)
+- test_syncrepl_timeout: increased sleep timeout in syncrepl 
+  testsuite
+
+-------------------------------------------------------------------
+Thu Apr  1 15:05:15 CEST 2004 - rhafer@suse.de
+
+- added "TLS_REQCERT allow" to /etc/openldap/ldap.conf, to make 
+  START_TLS work without access to the CA Certificate.
+  (Bugzilla: #37393)
+
+-------------------------------------------------------------------
+Fri Mar 26 15:30:12 CET 2004 - rhafer@suse.de
+
+- fixed filelist
+- check-build.sh (build on kernel >= 2.6.4 hosts only)
+- yast2user.schema / slapd.conf fixed (#37076)
+- don't check for TLS-options is init-script anymore (#33560)
+- fixed various typos in README.update
+
+-------------------------------------------------------------------
+Wed Mar 17 13:21:45 CET 2004 - rhafer@suse.de
+
+- fixed build of openldap-2.1-slapcat (using correct db41 include
+  files, build backends as on sles8)
+- attempt to update bdb database and reindex ldbm database in %{post}
+- Update notes in README.update
+- better default configuration (including default DB_CONFIG file)
+- misc updates for the YaST schema
+- fixed crasher in syncrepl-code (syncrepl.dif)
+
+-------------------------------------------------------------------
+Tue Mar 16 16:15:49 CET 2004 - schwab@suse.de
+
+- Fix type mismatch.
+
+-------------------------------------------------------------------
+Tue Mar  2 19:50:18 CET 2004 - rhafer@suse.de
+
+- updated to 2.2.6
+- build a openldap-2.1-slapcat from 2.1.25 sources  to be able to 
+  migrate from SLES8 and SL 9.0
+
+-------------------------------------------------------------------
+Thu Feb 19 17:25:12 CET 2004 - ro@suse.de
+
+- added check-build.sh (build on 2.6 hosts only)
+
+-------------------------------------------------------------------
+Thu Feb  5 17:38:52 CET 2004 - rhafer@suse.de
+
+- updated to 2.2.5 
+- adjusted rfc2307bis.schema to support UTF-8 values in most 
+  attributes
+- enabled proxycache-overlay (wiht fix to work with back-ldbm)
+
+-------------------------------------------------------------------
+Tue Jan 13 11:31:03 CET 2004 - rhafer@suse.de
+
+- updated to 2.2.4
+- updated Admin Guide to most recent version
+
+-------------------------------------------------------------------
+Sat Jan 10 10:19:26 CET 2004 - adrian@suse.de
+
+- add %defattr
+- fix build as user
+
+-------------------------------------------------------------------
+Mon Dec  8 16:46:03 CET 2003 - rhafer@suse.de
+
+- updated to 2.1.25
+- small fixes for the YaST user schema
+
+-------------------------------------------------------------------
+Tue Nov 11 15:20:05 CET 2003 - rhafer@suse.de
+
+- enabled SLP-support 
+
+-------------------------------------------------------------------
+Fri Oct 17 22:14:24 CEST 2003 - kukuk@suse.de
+
+- Remove unused des from neededforbuild
+
+-------------------------------------------------------------------
+Tue Sep  2 16:04:05 CEST 2003 - mt@suse.de
+
+- Bugzilla #29859: fixed typo in sysconfig metadata,
+  usage of OPENLDAP_LDAPS_INTERFACES in init script
+- added /usr/lib/sasl2/slapd.conf permissions handling
+- added sysconfig variable OPENLDAP_SLAPD_PARAMS=""
+  to support additional slapd start parameters
+- added sysconfig variable OPENLDAP_START_LDAPI=NO/yes
+  for ldapi:/// (LDAP over IPC) URLs
+
+-------------------------------------------------------------------
+Thu Aug 14 17:12:35 CEST 2003 - rhafer@suse.de
+
+- added activation metadata to sysconfig template (Bugzilla #28911)
+- removed lint from specfile
+
+-------------------------------------------------------------------
+Thu Aug  7 18:37:16 CEST 2003 - rhafer@suse.de
+
+- added %stop_on_removal and %restart_on_update calls
+- bdb_addcnt.dif fixes a possible endless loop in id2entry()
+- addonschema.tar.gz: some extra Schema files (YaST, RFC2307bis)
+
+-------------------------------------------------------------------
+Wed Jul 16 19:27:39 CEST 2003 - rhafer@suse.de
+
+- removed fillup_only and call fillup_and_insserv correctly
+- new Options in sysconfig.openldap: OPENLDAP_LDAP_INTERFACES,
+  OPENLDAP_LDAPS_INTERFACES and OPENLDAP_RUN_DB_RECOVER
+
+-------------------------------------------------------------------
+Tue Jul  1 15:42:03 CEST 2003 - rhafer@suse.de
+
+- updated to 2.1.22
+- updated Admin Guide to most recent version
+- build librewrite with -fPIC
+
+-------------------------------------------------------------------
+Mon Jun 16 16:29:03 CEST 2003 - rhafer@suse.de
+
+- updated to 2.1.21 
+
+-------------------------------------------------------------------
+Wed Jun 11 17:08:11 CEST 2003 - ro@suse.de
+
+- fixed requires lines 
+
+-------------------------------------------------------------------
+Mon May 26 16:00:43 CEST 2003 - rhafer@suse.de
+
+- don't link back-ldap against librewrite.a, it's already linked 
+  into slapd (package should build on non-i386 Archs again)
+
+-------------------------------------------------------------------
+Fri May 23 14:35:49 CEST 2003 - rhafer@suse.de
+
+- fixed dynamic build of back-ldap 
+- new subpackage back-ldap
+
+-------------------------------------------------------------------
+Tue May 20 11:04:50 CEST 2003 - rhafer@suse.de
+
+- updated to version 2.1.20
+- enabled dynamic backend modules
+- new subpackages back-perl, back-meta and back-monitor
+- remove unpacked files from BuildRoot
+
+-------------------------------------------------------------------
+Fri May  9 14:23:45 CEST 2003 - rhafer@suse.de
+
+- updated to version 2.1.19
+
+-------------------------------------------------------------------
+Wed Apr 16 00:34:31 CEST 2003 - ro@suse.de
+
+- fixed requires for devel-package ... 
+
+-------------------------------------------------------------------
+Tue Apr 15 10:18:11 CEST 2003 - ro@suse.de
+
+- fixed neededforbuild 
+
+-------------------------------------------------------------------
+Thu Feb 13 12:13:23 CET 2003 - kukuk@suse.de
+
+- Enable IPv6 again
+
+-------------------------------------------------------------------
+Tue Feb 11 19:02:14 CET 2003 - rhafer@suse.de
+
+- added /etc/openldap to filelist 
+
+-------------------------------------------------------------------
+Mon Feb  3 16:42:47 CET 2003 - rhafer@suse.de
+
+- switch default backend to ldbm 
+
+-------------------------------------------------------------------
+Sun Feb  2 23:58:34 CET 2003 - ro@suse.de
+
+- fixed requires for devel package (cyrus-sasl2-devel) 
+
+-------------------------------------------------------------------
+Fri Jan 31 08:58:39 CET 2003 - rhafer@suse.de
+
+- liblber.dif: Fixes two bugs in liblber by which remote attackers
+  could crash the LDAP server (Bugzilla #22469, OpenLDAP ITS #2275
+  and #2280)
+
+-------------------------------------------------------------------
+Tue Jan 14 11:53:11 CET 2003 - choeger@suse.de
+
+- build using sasl2
+
+-------------------------------------------------------------------
+Mon Jan 13 12:23:31 CET 2003 - rhafer@suse.de
+
+- updated to version 2.1.12
+- added metadata to sysconfig template (Bug: #22666)
+
+-------------------------------------------------------------------
+Thu Nov 28 14:42:06 CET 2002 - rhafer@suse.de
+
+- updated to version 2.1.8
+- added additional fix of 64bit archs
+- added secpatch.dif to fix setuid issues in libldap
+
+-------------------------------------------------------------------
+Fri Sep  6 11:11:07 CEST 2002 - rhafer@suse.de
+
+- fix for Bugzilla ID #18981, chown to OPENLDAP_USER didn't work
+  with multiple database backend directories
+
+-------------------------------------------------------------------
+Mon Sep  2 18:02:03 CEST 2002 - rhafer@suse.de
+
+- removed damoenstart_ipv6.diff and disabled IPv6 support due to 
+  massive problems with nss_ldap
+
+-------------------------------------------------------------------
+Mon Aug 26 19:37:32 CEST 2002 - rhafer@suse.de
+
+- ldap_user.dif: slapd is now run a the user/group ldap (Bugzilla
+  ID#17697)
+
+-------------------------------------------------------------------
+Fri Aug 23 13:54:15 CEST 2002 - rhafer@suse.de
+
+- updated to version 2.1.4, which fixes tons of bugs
+- added damoenstart_ipv6.diff (slapd was not starting when
+  configured to listen on IPv4 and IPv6 interfaces, as done by the
+   start script)
+- added README.SuSE with some hints about the bdb-backend
+- updated filelist to include only the man pages of the backends,
+  that were built
+
+-------------------------------------------------------------------
+Thu Aug 15 15:56:09 CEST 2002 - rhafer@suse.de
+
+- removed termcap and readline from neededforbuild 
+
+-------------------------------------------------------------------
+Thu Aug  8 11:21:36 CEST 2002 - rhafer@suse.de
+
+- enabled {CRYPT} passwords
+- update filelist (added new manpages)
+
+-------------------------------------------------------------------
+Thu Jul 25 15:58:03 CEST 2002 - rhafer@suse.de
+
+- patches for 64 bit architectures
+
+-------------------------------------------------------------------
+Fri Jul 19 11:28:28 CEST 2002 - rhafer@suse.de
+
+- update to 2.1.3
+
+-------------------------------------------------------------------
+Fri Jul  5 13:26:17 CEST 2002 - kukuk@suse.de
+
+- fix openldap2-devel requires 
+
+-------------------------------------------------------------------
+Thu Jul  4 10:29:03 CEST 2002 - rhafer@suse.de
+
+- switched back from cyrus-sasl2 to cyrus-sasl 
+
+-------------------------------------------------------------------
+Wed Jul  3 13:30:23 CEST 2002 - rhafer@suse.de
+
+- updated to OpenLDAP 2.1.2
+- added the OpenLDAP Administration Guide
+- enabled additional backends (ldap, meta, monitor)
+
+-------------------------------------------------------------------
+Mon Jun 10 21:59:35 CEST 2002 - olh@suse.de
+
+- hack build/ltconfig to build shared libs on ppc64
+
+-------------------------------------------------------------------
+Wed Jun  5 18:25:51 CEST 2002 - rhafer@suse.de
+
+- created /etc/sysconfig/openldap and OPENLDAP_START_LDAPS variable
+  to enable ldap over ssl support
+
+-------------------------------------------------------------------
+Thu Mar  7 16:27:15 CET 2002 - rhafer@suse.de
+
+- Fix for Bugzilla ID#14569 (added cyrus-sasl-devel openssl-devel 
+  to the "Requires" Section of the -devel subpackage)
+
+-------------------------------------------------------------------
+Mon Feb 18 13:06:10 CET 2002 - rhafer@suse.de
+
+- updated to the latest STABLE release (2.0.23) which fixes some 
+  nasty bugs see ITS #1562,#1582,#1577,#1578
+
+-------------------------------------------------------------------
+Thu Feb  7 14:13:25 CET 2002 - rhafer@suse.de
+
+- updated to the latest release (which fixes a index corruption 
+  bug)
+- cleanup in neededforbuild
+- small fixes for the init-scripts
+
+-------------------------------------------------------------------
+Thu Jan 17 13:51:28 CET 2002 - rhafer@suse.de
+
+- updated to the latest stable release (2.0.21)
+
+-------------------------------------------------------------------
+Wed Jan 16 18:36:12 CET 2002 - egmont@suselinux.hu
+
+- removed periods and colons from startup/shutdown messages
+
+-------------------------------------------------------------------
+Tue Jan 15 15:31:09 CET 2002 - rhafer@suse.de
+
+- updated to v2.0.20 (which fixes a security hole in ACL 
+  processing) 
+
+-------------------------------------------------------------------
+Fri Jan 11 15:54:51 CET 2002 - rhafer@suse.de
+
+- converted archive to bzip2
+- makes use of %{_libdir} now
+- set CFLAGS to -O0 for archs ia64, s390(x) and alpha otherwise 
+  the test suite fails on these archs
+- changed slapd.conf to store the database under /var/lib/ldap 
+  (this patch was missing in the last versions by accident)
+
+-------------------------------------------------------------------
+Mon Jan  7 16:41:32 CET 2002 - rhafer@suse.de
+
+- update to v2.0.19
+
+-------------------------------------------------------------------
+Thu Dec  6 14:51:56 CET 2001 - rhafer@suse.de
+
+- eliminated START_LDAP, START_SLURPD variables in rc.config
+- created separate init script for slurpd
+- moved init scripts from dif to separate source tgz
+
+-------------------------------------------------------------------
+Fri Oct 26 10:36:06 CEST 2001 - choeger@suse.de
+
+- update to v2.0.18
+
+-------------------------------------------------------------------
+Mon Oct 15 10:00:06 CEST 2001 - choeger@suse.de
+
+- update to v2.0.17
+  added a sleep to the restart section
+  moved some manpages to the client package
+
+-------------------------------------------------------------------
+Mon Oct  1 18:38:14 CEST 2001 - choeger@suse.de
+
+- update to v2.0.15
+
+-------------------------------------------------------------------
+Wed Sep 12 09:53:03 CEST 2001 - choeger@suse.de
+
+- backported the full bugfix from openldap-2.0.14
+
+-------------------------------------------------------------------
+Tue Sep 11 11:36:20 CEST 2001 - choeger@suse.de
+
+- Bugfix for slurpd millionth second bug (ITS#1323)
+
+-------------------------------------------------------------------
+Mon Sep 10 09:06:40 CEST 2001 - choeger@suse.de
+
+- moved ldapfilter.conf ldaptemplates.conf ldapsearchprefs.conf
+  to openldap2-client package
+
+-------------------------------------------------------------------
+Mon Sep  3 09:31:21 CEST 2001 - choeger@suse.de
+
+- update to version 2.0.12
+
+-------------------------------------------------------------------
+Mon Jul  2 10:52:22 CEST 2001 - choeger@suse.de
+
+- bugfix: init script was not LSB compliant, Bugzilla ID#9072
+
+-------------------------------------------------------------------
+Tue Jun 19 16:18:54 CEST 2001 - ro@suse.de
+
+- fixed for autoconf again 
+
+-------------------------------------------------------------------
+Fri Jun 15 10:23:24 CEST 2001 - choeger@suse.de
+
+- update to 2.0.11
+- removed autoconf in specfile, because it doesn't work
+
+-------------------------------------------------------------------
+Wed May 23 11:43:08 CEST 2001 - choeger@suse.de
+
+- update to version 2.0.10 (minor fixes)
+
+-------------------------------------------------------------------
+Tue May 22 11:33:58 CEST 2001 - choeger@suse.de
+
+- update to version 2.0.9
+
+-------------------------------------------------------------------
+Mon Apr 23 15:55:32 CEST 2001 - choeger@suse.de
+
+- removed kerberos support
+- added aci support
+
+-------------------------------------------------------------------
+Fri Apr 20 11:52:14 CEST 2001 - choeger@suse.de
+
+- added kerberos support
+
+-------------------------------------------------------------------
+Thu Apr  5 13:47:51 CEST 2001 - choeger@suse.de
+
+- moved section 5 and 8 manpages to the server part of package
+
+-------------------------------------------------------------------
+Wed Mar 14 18:17:50 CET 2001 - kukuk@suse.de
+
+- Move *.so links into -devel package
+- -devel requires -client
+
+-------------------------------------------------------------------
+Thu Mar  8 10:51:05 CET 2001 - choeger@suse.de
+
+- split up into openldap2-client and -devel
+
+-------------------------------------------------------------------
+Tue Feb 27 11:20:53 CET 2001 - ro@suse.de
+
+- changed neededforbuild <cyrus-sasl> to <cyrus-sasl cyrus-sasl-devel>
+
+-------------------------------------------------------------------
+Fri Feb 23 00:10:25 CET 2001 - ro@suse.de
+
+- added readline/readline-devel to neededforbuild (split from bash)
+
+-------------------------------------------------------------------
+Thu Jan  4 14:03:17 CET 2001 - choeger@suse.de
+
+- bugfix: slapd.conf rename /var/lib/openldap-ldbm to
+          /var/lib/ldap
+          init script: use $remote_fs
+
+-------------------------------------------------------------------
+Tue Jan  2 10:38:20 CET 2001 - olh@suse.de
+
+- use script name in %post
+
+-------------------------------------------------------------------
+Thu Dec  7 15:01:53 CET 2000 - choeger@suse.de
+
+- bugfix from Andreas Jaeger:
+  workaround for glibc2.2, detach
+
+-------------------------------------------------------------------
+Fri Dec  1 15:23:45 CET 2000 - ro@suse.de
+
+- hacked configure for apparently broken pthread 
+
+-------------------------------------------------------------------
+Fri Dec  1 02:28:54 CET 2000 - ro@suse.de
+
+- fixed spec 
+
+-------------------------------------------------------------------
+Thu Nov 23 11:27:07 CET 2000 - choeger@suse.de
+
+- made configs %config(noreplace) (Bug 4112)
+- fixed neededforbuild
+
+-------------------------------------------------------------------
+Wed Nov 22 11:37:22 CET 2000 - choeger@suse.de
+
+- adopted new init scheme
+
+-------------------------------------------------------------------
+Wed Nov 15 16:24:48 CET 2000 - choeger@suse.de
+
+- fixed neededforbuild
+
+-------------------------------------------------------------------
+Fri Nov 10 16:32:57 CET 2000 - choeger@suse.de
+
+- added buildroot
+
+-------------------------------------------------------------------
+Tue Nov  7 18:52:54 CET 2000 - choeger@suse.de
+
+- long package name
+- new version, 2.0.7
+
+-------------------------------------------------------------------
+Fri Oct  6 11:35:47 CEST 2000 - choeger@suse.de
+
+- first package of openldap2 (v2.0.6)
+

@@ -1,0 +1,100 @@
+Index: servers/slapd/slapd.conf
+===================================================================
+--- servers/slapd/slapd.conf.orig
++++ servers/slapd/slapd.conf
+@@ -3,6 +3,10 @@
+ # This file should NOT be world readable.
+ #
+ include		%SYSCONFDIR%/schema/core.schema
++include		%SYSCONFDIR%/schema/cosine.schema
++include		%SYSCONFDIR%/schema/inetorgperson.schema
++include		%SYSCONFDIR%/schema/rfc2307bis.schema
++include		%SYSCONFDIR%/schema/yast.schema
+ 
+ # Define global ACLs to disable default read access.
+ 
+@@ -10,16 +14,15 @@ include		%SYSCONFDIR%/schema/core.schema
+ # service AND an understanding of referrals.
+ #referral	ldap://root.openldap.org
+ 
+-pidfile		%LOCALSTATEDIR%/run/slapd.pid
+-argsfile	%LOCALSTATEDIR%/run/slapd.args
++pidfile		%LOCALSTATEDIR%/slapd.pid
++argsfile	%LOCALSTATEDIR%/slapd.args
+ 
+ # Load dynamic backend modules:
+-# modulepath	%MODULEDIR%
+-# moduleload	back_bdb.la
++modulepath	%MODULEDIR%
+ # moduleload	back_ldap.la
+-# moduleload	back_ldbm.la
+-# moduleload	back_passwd.la
+-# moduleload	back_shell.la
++# moduleload	back_meta.la
++# moduleload	back_monitor.la
++# moduleload	back_perl.la
+ 
+ # Sample security restrictions
+ #	Require integrity protection (prevent hijacking)
+@@ -28,20 +31,30 @@ argsfile	%LOCALSTATEDIR%/run/slapd.args
+ # security ssf=1 update_ssf=112 simple_bind=64
+ 
+ # Sample access control policy:
+-#	Root DSE: allow anyone to read it
+-#	Subschema (sub)entry DSE: allow anyone to read it
+-#	Other DSEs:
+-#		Allow self write access
+-#		Allow authenticated users read access
+-#		Allow anonymous users to authenticate
+-#	Directives needed to implement policy:
+-# access to dn.base="" by * read
+-# access to dn.base="cn=Subschema" by * read
+-# access to *
+-#	by self write
+-#	by users read
+-#	by anonymous auth
+-#
++#       Root DSE: allow anyone to read it
++#       Subschema (sub)entry DSE: allow anyone to read it
++#       Other DSEs:
++#               Allow self write access to user password
++#               Allow anonymous users to authenticate
++#               Allow read access to everything else
++#       Directives needed to implement policy:
++access to dn.base=""
++        by * read
++
++access to dn.base="cn=Subschema"
++        by * read
++
++access to attrs=userPassword,userPKCS12
++        by self write
++        by * auth
++
++access to attrs=shadowLastChange
++        by self write
++        by * read
++
++access to *
++        by * read
++
+ # if no access controls are present, the default policy
+ # allows anyone and everyone to read anything but restricts
+ # updates to rootdn.  (e.g., "access to * by * read")
+@@ -54,6 +67,8 @@ argsfile	%LOCALSTATEDIR%/run/slapd.args
+ 
+ database	bdb
+ suffix		"dc=my-domain,dc=com"
++checkpoint      1024    5
++cachesize       10000
+ rootdn		"cn=Manager,dc=my-domain,dc=com"
+ # Cleartext passwords, especially for the rootdn, should
+ # be avoid.  See slappasswd(8) and slapd.conf(5) for details.
+@@ -62,6 +77,6 @@ rootpw		secret
+ # The database directory MUST exist prior to running slapd AND 
+ # should only be accessible by the slapd and slap tools.
+ # Mode 700 recommended.
+-directory	%LOCALSTATEDIR%/openldap-data
++directory	/var/lib/ldap
+ # Indices to maintain
+ index	objectClass	eq

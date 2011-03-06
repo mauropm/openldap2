@@ -1,0 +1,13 @@
+diff -up openldap-2.3.43/servers/slapd/overlays/syncprov.c.rh620621 openldap-2.3.43/servers/slapd/overlays/syncprov.c
+--- openldap-2.3.43/servers/slapd/overlays/syncprov.c.rh620621	2010-08-06 10:15:47.775211287 +0200
++++ openldap-2.3.43/servers/slapd/overlays/syncprov.c	2010-08-06 10:16:24.894369636 +0200
+@@ -908,6 +908,9 @@ syncprov_qtask( void *ctx, void *arg )
+ 	} else {
+ 		/* bail out on any error */
+ 		ldap_pvt_runqueue_remove( &slapd_rq, rtask );
++		/* Prevent duplicate remove */
++		if ( so->s_qtask == rtask )
++			so->s_qtask = NULL;
+ 	}
+ 	ldap_pvt_thread_mutex_unlock( &slapd_rq.rq_mutex );
+ 

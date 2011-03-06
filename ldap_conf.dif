@@ -1,0 +1,8 @@
+--- libraries/libldap/ldap.conf	2004/04/01 09:43:12	1.1
++++ libraries/libldap/ldap.conf	2004/04/01 09:50:42
+@@ -11,3 +11,5 @@
+ #SIZELIMIT	12
+ #TIMELIMIT	15
+ #DEREF		never
++TLS_REQCERT allow
++

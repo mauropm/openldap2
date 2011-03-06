@@ -1,0 +1,21 @@
+--- openldap-2.3.43/servers/slapd/overlays/rwm.c.orig	2009-11-03 16:51:06.000000000 +0100
++++ openldap-2.3.43/servers/slapd/overlays/rwm.c	2009-11-04 16:06:03.000000000 +0100
+@@ -71,10 +71,14 @@ rwm_op_cleanup( Operation *op, SlapReply
+ 			break;
+ 		case LDAP_REQ_MODRDN:
+ 			if ( op->orr_newSup != ros->orr_newSup ) {
+-				ch_free( op->orr_newSup->bv_val );
+-				ch_free( op->orr_nnewSup->bv_val );
+-				op->o_tmpfree( op->orr_newSup, op->o_tmpmemctx );
+-				op->o_tmpfree( op->orr_nnewSup, op->o_tmpmemctx );
++				if ( op->orr_newSup != NULL ) {
++					if ( op->orr_newSup->bv_val ) ch_free( op->orr_newSup->bv_val );
++					op->o_tmpfree( op->orr_newSup, op->o_tmpmemctx );
++				}
++				if ( op->orr_newSup != NULL ) {
++					if ( op->orr_newSup->bv_val ) ch_free( op->orr_nnewSup->bv_val );
++					op->o_tmpfree( op->orr_nnewSup, op->o_tmpmemctx );
++				}
+ 				op->orr_newSup = ros->orr_newSup;
+ 				op->orr_nnewSup = ros->orr_nnewSup;
+ 			}

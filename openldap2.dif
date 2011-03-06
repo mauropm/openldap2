@@ -1,0 +1,50 @@
+Index: build/top.mk
+===================================================================
+--- build/top.mk.orig
++++ build/top.mk
+@@ -39,7 +39,7 @@ libdir = @libdir@
+ libexecdir = @libexecdir@
+ localstatedir = @localstatedir@
+ mandir = @mandir@
+-moduledir = @libexecdir@$(ldap_subdir)
++moduledir = @libexecdir@/modules
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+ sysconfdir = @sysconfdir@$(ldap_subdir)
+@@ -58,7 +58,7 @@ INSTALL_PROGRAM = $(INSTALL)
+ INSTALL_DATA = $(INSTALL) -m 644
+ INSTALL_SCRIPT = $(INSTALL)
+ 
+-STRIP = -s
++#STRIP = -s
+ 
+ LINT = lint
+ 5LINT = 5lint
+Index: servers/slapd/aclparse.c
+===================================================================
+--- servers/slapd/aclparse.c.orig
++++ servers/slapd/aclparse.c
+@@ -643,7 +643,7 @@ parse_acl(
+ 						if ( rc != LDAP_SUCCESS ) {
+ 							char	buf[ SLAP_TEXT_BUFLEN ];
+ 
+-							snprintf( buf, sizeof( buf ), "%s: line %d: "
++							snprintf( buf, sizeof( buf ), 
+ 								" attr \"%s\" normalization failed (%d: %s)",
+ 								fname, lineno,
+ 								a->acl_attrs[ 0 ].an_name.bv_val, rc, text );
+Index: configure.in
+===================================================================
+--- configure.in.orig
++++ configure.in
+@@ -64,7 +64,9 @@ dnl Determine host platform
+ dnl		we try not to use this for much
+ AC_CANONICAL_TARGET([])
+ 
+-AM_INIT_AUTOMAKE([$OL_PACKAGE],[$OL_VERSION], [no defines])dnl
++AC_PROG_MAKE_SET
++PACKAGE=$OL_PACKAGE
++VERSION=$OL_VERSION
+ AC_SUBST(PACKAGE)dnl
+ AC_SUBST(VERSION)dnl
+ AC_DEFINE_UNQUOTED(OPENLDAP_PACKAGE,"$PACKAGE",Package)
